@@ -1,0 +1,6 @@
+include ':sample', ':exoplayer-core', ':exopleyer-okhttp', ':exoplayer-ffmpeg', ':exoplayer-flac', ':exoplayer-opus'
+project(':exoplayer-core').projectDir = new File('ExoPlayer/library/core')
+project(':exopleyer-okhttp').projectDir = new File('ExoPlayer/extensions/okhttp')
+project(':exoplayer-ffmpeg').projectDir = new File('ExoPlayer/extensions/ffmpeg')
+project(':exoplayer-flac').projectDir = new File('ExoPlayer/extensions/flac')
+project(':exoplayer-opus').projectDir = new File('ExoPlayer/extensions/opus')
