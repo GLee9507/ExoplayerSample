@@ -109,6 +109,6 @@ public final class FfmpegLibrary {
   }
 
   private static native String ffmpegGetVersion();
-  private static native boolean ffmpegHasDecoder(String codecName);
+  public static native boolean ffmpegHasDecoder(String codecName);
 
 }

@@ -2,30 +2,38 @@ package com.glee.exoplayersample
 
 import android.content.Context
 import android.net.Uri
-import android.os.Handler
-import android.os.HandlerThread
+import android.util.Log
 import android.util.Patterns
+import com.google.android.exoplayer2.DefaultRenderersFactory
+import com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
-import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.extractor.ts.Ac3Extractor
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
 import okhttp3.Call
 import okhttp3.OkHttpClient
-import java.io.IOException
 
 
-class MusicPlayer(private val applicationContext: Context) : Player {
+class MusicPlayer constructor(private val applicationContext: Context) : Player {
 
 
     private val player: SimpleExoPlayer
-    private val handler: Handler
+    //    internal val handler: Handler
     private val concatenatingMediaSource: ConcatenatingMediaSource
     private val musicSourceList: MutableList<MusicSource>
     private var currentIndex: Int = -1
+
+    private val NET by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        OkHttpClient.Builder()
+                .build()
+    }
     private val eventListener = object : com.google.android.exoplayer2.Player.DefaultEventListener() {
         override fun onPlayerError(error: ExoPlaybackException?) {
             super.onPlayerError(error)
@@ -33,48 +41,24 @@ class MusicPlayer(private val applicationContext: Context) : Player {
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
+            Log.d("glee9507", playWhenReady.toString() + "--" + playbackState)
         }
     }
 
+    private val bandwidthMeter: DefaultBandwidthMeter = DefaultBandwidthMeter()
+
     init {
-        val bandwidthMeter = DefaultBandwidthMeter()
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(bandwidthMeter)
+        val renderersFactory = DefaultRenderersFactory(applicationContext, EXTENSION_RENDERER_MODE_ON)
         val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
-        player = ExoPlayerFactory.newSimpleInstance(applicationContext, trackSelector)
-        val playerHandlerThread = HandlerThread("player_thread")
-        handler = Handler(playerHandlerThread.looper)
-        playerHandlerThread.start()
+        player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector)
+//        val playerHandlerThread = HandlerThread("player_thread")
+//        playerHandlerThread.start()
+//        handler = Handler(playerHandlerThread.looper)
         player.addListener(eventListener)
         concatenatingMediaSource = ConcatenatingMediaSource()
-        concatenatingMediaSource.addEventListener(handler, object : MediaSourceEventListener {
-            override fun onMediaPeriodCreated(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?) {
-            }
-
-            override fun onMediaPeriodReleased(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?) {
-            }
-
-            override fun onLoadStarted(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, loadEventInfo: MediaSourceEventListener.LoadEventInfo?, mediaLoadData: MediaSourceEventListener.MediaLoadData?) {
-            }
-
-            override fun onLoadCompleted(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, loadEventInfo: MediaSourceEventListener.LoadEventInfo?, mediaLoadData: MediaSourceEventListener.MediaLoadData?) {
-            }
-
-            override fun onLoadCanceled(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, loadEventInfo: MediaSourceEventListener.LoadEventInfo?, mediaLoadData: MediaSourceEventListener.MediaLoadData?) {
-            }
-
-            override fun onLoadError(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, loadEventInfo: MediaSourceEventListener.LoadEventInfo?, mediaLoadData: MediaSourceEventListener.MediaLoadData?, error: IOException?, wasCanceled: Boolean) {
-            }
-
-            override fun onReadingStarted(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?) {
-            }
-
-            override fun onUpstreamDiscarded(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, mediaLoadData: MediaSourceEventListener.MediaLoadData?) {
-            }
-
-            override fun onDownstreamFormatChanged(windowIndex: Int, mediaPeriodId: MediaSource.MediaPeriodId?, mediaLoadData: MediaSourceEventListener.MediaLoadData?) {
-            }
-        })
         musicSourceList = mutableListOf()
+        player.prepare(concatenatingMediaSource, true, true)
     }
 
 
@@ -82,37 +66,40 @@ class MusicPlayer(private val applicationContext: Context) : Player {
         ExtractorMediaSource.Factory(OkHttpDataSourceFactory(
                 Call.Factory {
                     NET.newCall(it)
-                }, "exoplayer", object : TransferListener<DataSource> {
-            override fun onTransferStart(source: DataSource?, dataSpec: DataSpec?) {
-            }
-
-            override fun onBytesTransferred(source: DataSource?, bytesTransferred: Int) {
-            }
-
-            override fun onTransferEnd(source: DataSource?) {
-            }
-        }))
+                }, "exoplayer", bandwidthMeter))
     }
 
     private val localDataSourceFactory by lazy { ExtractorMediaSource.Factory(DefaultDataSourceFactory(applicationContext, "exoplayer")) }
 
-    override fun play(index: Int) {
-        player.prepare(concatenatingMediaSource)
-        player.playWhenReady = true
-    }
 
     override fun pause() {
+
         player.playWhenReady = false
     }
 
-    override fun resumePlay() {
+
+    override fun play() {
         player.playWhenReady = true
     }
 
+    override fun play(index: Int) {
+        player.seekTo(index, 0)
+        currentIndex = index
+        player.playWhenReady = true
+    }
+
+    override fun seekTo(position: Long) {
+        player.seekTo(position)
+    }
+
     override fun next() {
+        player.seekTo(++currentIndex, 0)
     }
 
     override fun pre() {
+        if (currentIndex > 0) {
+            player.seekTo(--currentIndex, 0)
+        }
     }
 
     override fun stop() {
@@ -121,6 +108,7 @@ class MusicPlayer(private val applicationContext: Context) : Player {
 
     override fun release() {
         player.release()
+        clearMusicSource()
     }
 
 
@@ -128,6 +116,12 @@ class MusicPlayer(private val applicationContext: Context) : Player {
         clearMusicSource()
         addMusicSource(0, musicSources.toList())
     }
+
+    fun setMusicSource(musicSources: List<MusicSource>) {
+        clearMusicSource()
+        addMusicSource(0, musicSources.toList())
+    }
+
 
     override fun removeMusicSource(vararg musicSources: MusicSource) {
         for (musicSource in musicSources) {
@@ -154,21 +148,21 @@ class MusicPlayer(private val applicationContext: Context) : Player {
     }
 
     override fun addMusicSource(vararg musicSources: MusicSource) {
-        addMusicSource(concatenatingMediaSource.size - 1, musicSources.toList())
+        addMusicSource(concatenatingMediaSource.size, musicSources.toList())
     }
 
 
     private fun addMusicSource(index: Int, musicSources: List<MusicSource>) {
         val list = mutableListOf<MediaSource>()
         for (musicSource in musicSources) {
-            val uriStr = musicSource.getUri()
-            val uri = Uri.parse(uriStr)
+            val uriStr = musicSource.uri
+            val uri = Uri.parse(uriStr).toString()
             //判断是否为网络Uri
-            if (Patterns.WEB_URL.matcher(uriStr).matches()) {
-                list.add(netDataSourceFactory.createMediaSource(uri))
-            } else {
-                list.add(localDataSourceFactory.createMediaSource(uri))
-            }
+//            if (Patterns.WEB_URL.matcher(uriStr).matches()) {
+//                list.add(netDataSourceFactory.createMediaSource(uri))
+//            } else {
+            list.add(localDataSourceFactory.createMediaSource(Uri.parse(uri)))
+//            }
         }
         concatenatingMediaSource.addMediaSources(index, list)
         musicSourceList.addAll(index, musicSources)
@@ -178,12 +172,6 @@ class MusicPlayer(private val applicationContext: Context) : Player {
         concatenatingMediaSource.clear()
         musicSourceList.clear()
     }
-
-
 }
 
 
-val NET by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-    OkHttpClient.Builder()
-            .build()
-}

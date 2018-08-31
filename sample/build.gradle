@@ -34,4 +34,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     implementation project(':exoplayer-core')
     implementation project(':exopleyer-okhttp')
+    implementation project(':exoplayer-ffmpeg')
 }
