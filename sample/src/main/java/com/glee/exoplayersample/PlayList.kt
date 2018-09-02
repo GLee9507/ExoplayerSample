@@ -28,12 +28,16 @@ class PlayList constructor(private val context: Context) {
         }
     }
 
+    fun remove(index: Int) {
+        concatenatingMediaSource.removeMediaSource(index)
+    }
+
     fun add(musicSources: Collection<MusicSource>) {
         add(concatenatingMediaSource.size, musicSources)
     }
 
     fun prepare(player: ExoPlayer) {
-        concatenatingMediaSource.prepareSourceInternal(player,false)
+        concatenatingMediaSource.prepareSourceInternal(player, false)
     }
 
     fun add(index: Int, musicSources: Collection<MusicSource>) {
