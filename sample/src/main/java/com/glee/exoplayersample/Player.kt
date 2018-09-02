@@ -1,5 +1,6 @@
 package com.glee.exoplayersample
 
+import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 import java.time.Duration
@@ -17,16 +18,17 @@ interface Player {
     fun seekTo(position: Long)
 
 
-    fun setMusicSource(vararg musicSources: MusicSource)
-    fun removeMusicSource(vararg musicSources: MusicSource)
+    fun setMusicSource(musicSources: Collection<MusicSource>)
+    fun removeMusicSource(musicSources: Collection<MusicSource>)
     fun removeMusicSource(index: Int)
-    fun addMusicSource(index: Int, vararg musicSources: MusicSource)
-    fun addMusicSource(vararg musicSources: MusicSource)
+    fun addMusicSource(index: Int, musicSources: Collection<MusicSource>)
+    fun addMusicSource(musicSources: Collection<MusicSource>)
     fun clearMusicSource()
 }
 
 interface MusicSource {
-    val uri: String
+    val uriStr: String
+    fun getUri(): Uri = Uri.parse(uriStr)
 }
 
 interface EventListener {

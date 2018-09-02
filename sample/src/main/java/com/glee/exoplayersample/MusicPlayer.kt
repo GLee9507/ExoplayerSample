@@ -3,14 +3,13 @@ package com.glee.exoplayersample
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.util.Patterns
 import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ext.flac.FlacExtractor
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
-import com.google.android.exoplayer2.extractor.ts.Ac3Extractor
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
@@ -26,10 +25,10 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
 
     private val player: SimpleExoPlayer
     //    internal val handler: Handler
-    private val concatenatingMediaSource: ConcatenatingMediaSource
-    private val musicSourceList: MutableList<MusicSource>
+//    private val concatenatingMediaSource: ConcatenatingMediaSource
+//    private val musicSourceList: MutableList<MusicSource>
     private var currentIndex: Int = -1
-
+    private val playList: PlayList
     private val NET by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         OkHttpClient.Builder()
                 .build()
@@ -49,16 +48,20 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
 
     init {
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory(bandwidthMeter)
-        val renderersFactory = DefaultRenderersFactory(applicationContext, EXTENSION_RENDERER_MODE_ON)
+//        val renderersFactory = DefaultRenderersFactory(applicationContext, EXTENSION_RENDERER_MODE_ON)
         val trackSelector = DefaultTrackSelector(videoTrackSelectionFactory)
-        player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector)
+        player = ExoPlayerFactory.newSimpleInstance(AudioOnlyRenderersFactory(applicationContext), trackSelector)
 //        val playerHandlerThread = HandlerThread("player_thread")
 //        playerHandlerThread.start()
 //        handler = Handler(playerHandlerThread.looper)
         player.addListener(eventListener)
-        concatenatingMediaSource = ConcatenatingMediaSource()
-        musicSourceList = mutableListOf()
-        player.prepare(concatenatingMediaSource, true, true)
+        playList = PlayList(applicationContext)
+//        concatenatingMediaSource = ConcatenatingMediaSource()
+//        musicSourceList = mutableListOf()
+        player.prepare(playList.concatenatingMediaSource, true, true)
+//        playList.prepare(player)
+
+
     }
 
 
@@ -71,7 +74,7 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
 
     private val localDataSourceFactory by lazy {
         ExtractorMediaSource.Factory(DefaultDataSourceFactory(applicationContext, "exoplayer")).apply {
-            setExtractorsFactory(FlacExtractor.FACTORY)
+
         }
     }
 
@@ -115,66 +118,27 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
         clearMusicSource()
     }
 
-
-    override fun setMusicSource(vararg musicSources: MusicSource) {
+    override fun setMusicSource(musicSources: Collection<MusicSource>) {
         clearMusicSource()
-        addMusicSource(0, musicSources.toList())
+        playList.add(musicSources)
     }
 
-    fun setMusicSource(musicSources: List<MusicSource>) {
-        clearMusicSource()
-        addMusicSource(0, musicSources.toList())
-    }
-
-
-    override fun removeMusicSource(vararg musicSources: MusicSource) {
-        for (musicSource in musicSources) {
-            val i = musicSourceList.indexOf(musicSource)
-            if (i > -1) {
-                remove(i)
-            }
-        }
+    override fun removeMusicSource(musicSources: Collection<MusicSource>) {
     }
 
     override fun removeMusicSource(index: Int) {
-        if (concatenatingMediaSource.size > index) {
-            remove(index)
-        }
     }
 
-    private fun remove(index: Int) {
-        concatenatingMediaSource.removeMediaSource(index)
-        musicSourceList.removeAt(index)
+    override fun addMusicSource(index: Int, musicSources: Collection<MusicSource>) {
+        playList.add(index, musicSources)
     }
 
-    override fun addMusicSource(index: Int, vararg musicSources: MusicSource) {
-        addMusicSource(index, musicSources.toList())
-    }
-
-    override fun addMusicSource(vararg musicSources: MusicSource) {
-        addMusicSource(concatenatingMediaSource.size, musicSources.toList())
-    }
-
-
-    private fun addMusicSource(index: Int, musicSources: List<MusicSource>) {
-        val list = mutableListOf<MediaSource>()
-        for (musicSource in musicSources) {
-            val uriStr = musicSource.uri
-            val uri = Uri.parse(uriStr).toString()
-            //判断是否为网络Uri
-//            if (Patterns.WEB_URL.matcher(uriStr).matches()) {
-//                list.add(netDataSourceFactory.createMediaSource(uri))
-//            } else {
-            list.add(localDataSourceFactory.createMediaSource(Uri.parse(uri)))
-//            }
-        }
-        concatenatingMediaSource.addMediaSources(index, list)
-        musicSourceList.addAll(index, musicSources)
+    override fun addMusicSource(musicSources: Collection<MusicSource>) {
+        playList.add(musicSources)
     }
 
     override fun clearMusicSource() {
-        concatenatingMediaSource.clear()
-        musicSourceList.clear()
+        playList.clear()
     }
 }
 

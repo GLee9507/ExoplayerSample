@@ -8,19 +8,18 @@ import com.google.android.exoplayer2.extractor.ExtractorOutput;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.extractor.Id3Peeker;
 import com.google.android.exoplayer2.extractor.PositionHolder;
-import com.google.android.exoplayer2.extractor.wav.WavExtractor;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Decoder;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-class FlacExtractor implements Extractor {
+class ApeExtractor implements Extractor {
     public static final ExtractorsFactory FACTORY = new ExtractorsFactory() {
 
         @Override
         public Extractor[] createExtractors() {
-            return new Extractor[] {new FlacExtractor()};
+            return new Extractor[] {new ApeExtractor()};
         }
 
     };
@@ -69,7 +68,7 @@ class FlacExtractor implements Extractor {
         return b;
     }
 
-    public FlacExtractor() {
+    public ApeExtractor() {
         id3Peeker = new Id3Peeker();
     }
 

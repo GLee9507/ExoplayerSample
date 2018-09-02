@@ -26,38 +26,34 @@ class MainActivity : AppCompatActivity() {
 //        val path = "android:resource://com.glee.exoplayersample/"
 
         musicPlayer.setMusicSource(
-//                {
-//                    val locales = assets.locales
-//                    val list = mutableListOf<Music>()
-//                    for (locale in locales) {
-//                        list.add(Music(locale))
-//                    }
-//                    list
-//                }.invoke()
-//                Music(path+"mp3"),
+                listOf(
+
+
+//                        Music(path + "mp3"),
 //                Music(path+"aac"),
 //                Music(path+"ac3"),
-                //no support
+                        //no support
 //                Music(path+"aiff"),
 //                Music(path+"amr"),
-                //no support
+                        //no support
 //                Music(path+"au"),
 //                Music(path+"m4a"),
 //                Music(path+"mka"),
 //                Music(path+"mp2"),
-//                Music(path+"ogg"),
-                //no support
+//                        Music(path + "ogg"),
+//                        no support
 //                Music(path+"ra"),
-//                Music(path+"wav")
-                //no support
+//                        Music(path + "wav"),
+                        //no support
 //                Music(path+"wma")
-                Music(path+"flac")
+                        Music(path + "flac")
 //                Music(path + "ape")
 
 
+                )
         )
-Log.d("glee9507",FfmpegLibrary.getVersion())
-        Log.d("glee9507", FfmpegLibrary.supportsFormat(MimeTypes.AUDIO_FLAC).toString() + "--" + FfmpegLibrary.ffmpegHasDecoder ("ape"))
+//Log.d("glee9507",FfmpegLibrary.getVersion())
+//        Log.d("glee9507", FfmpegLibrary.supportsFormat(MimeTypes.AUDIO_FLAC).toString() + "--" + FfmpegLibrary.ffmpegHasDecoder ("ape"))
         play.setOnClickListener {
             musicPlayer.play(0)
         }
@@ -71,4 +67,4 @@ Log.d("glee9507",FfmpegLibrary.getVersion())
 }
 
 
-data class Music(override val uri: String) : MusicSource
+data class Music(override val uriStr: String) : MusicSource

@@ -33,5 +33,7 @@ android {
         implementation project(':exoplayer-core')
         implementation project(':exopleyer-okhttp')
         implementation project(':exoplayer-ffmpeg')
+        implementation project(':exoplayer-flac')
+        implementation project(':exoplayer-opus')
     }
 }
