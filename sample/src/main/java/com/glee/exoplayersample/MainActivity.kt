@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         val path = Environment.getExternalStorageDirectory().canonicalPath + "/mc/Kalimba."
 //        val path = "android:resource://com.glee.exoplayersample/"
 
-        musicPlayer.setMusicSource(
+//        musicPlayer.setMusicSource(
 //                {
 //                    val locales = assets.locales
 //                    val list = mutableListOf<Music>()
@@ -48,14 +48,14 @@ class MainActivity : AppCompatActivity() {
 //                Music(path+"ogg"),
                 //no support
 //                Music(path+"ra"),
-                Music(path+"wav")
+//                Music(path+"wav")
                 //no support
 //                Music(path+"wma")
 //                Music(path+"flac")
 //                Music(path + "ape")
 
 
-        )
+//        )
 Log.d("glee9507",FfmpegLibrary.getVersion())
         Log.d("glee9507", FfmpegLibrary.supportsFormat(MimeTypes.AUDIO_FLAC).toString() + "--" + FfmpegLibrary.ffmpegHasDecoder ("ape"))
         play.setOnClickListener {

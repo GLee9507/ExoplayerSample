@@ -1,7 +1,8 @@
-# EXOPLAYER_ROOT="$(pwd)"
-# FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
-NDK_PATH="/mnt/d/ubuntu/android-ndk"
-FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
+EXOPLAYER_ROOT="$(pwd)"
+FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
+NDK_PATH="/home/glee/Android/android-ndk-r15c"
+#NDK_PATH="/mnt/d/ubuntu/android-ndk"
+#FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
 HOST_PLATFORM="linux-x86_64"
 COMMON_OPTIONS="\
     --target-os=android \
@@ -28,7 +29,7 @@ cd "${FFMPEG_EXT_PATH}/jni" && \
 
 (proxychains4 git -C ffmpeg pull || proxychains4 git clone git://source.ffmpeg.org/ffmpeg ffmpeg) && \
 cd ffmpeg && \
-./configure \
+make clean && ./configure \
     --libdir=android-libs/armeabi-v7a \
     --arch=arm \
     --cpu=armv7-a \
@@ -39,7 +40,7 @@ cd ffmpeg && \
     --extra-ldexeflags=-pie \
     ${COMMON_OPTIONS} \
     && \
-make -j4 && make install-libs && \
+make -j4 && make install-libs  
 
 # make clean && ./configure \
 #     --libdir=android-libs/arm64-v8a \
@@ -62,6 +63,3 @@ make -j4 && make install-libs && \
 #     ${COMMON_OPTIONS} \
 #     && \
 # make -j4 && make install-libs && \
-
-
-make clean

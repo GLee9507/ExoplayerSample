@@ -34,7 +34,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := ffmpeg
 LOCAL_SRC_FILES := ffmpeg_jni.cc
-LOCAL_C_INCLUDES := ffmpeg
+LOCAL_C_INCLUDES := /home/glee/Develop/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main/jni/ffmpeg
 LOCAL_SHARED_LIBRARIES := libavcodec libavresample libavutil
 LOCAL_LDLIBS := -Lffmpeg/android-libs/$(TARGET_ARCH_ABI) -llog
 include $(BUILD_SHARED_LIBRARY)

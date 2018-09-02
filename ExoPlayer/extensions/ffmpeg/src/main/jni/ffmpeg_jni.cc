@@ -88,7 +88,7 @@ int decodePacket(AVCodecContext *context, AVPacket *packet,
 void logError(const char *functionName, int errorNumber);
 
 /**
- * Releases the specified context.ffmpegGetVersion
+ * Releases the specified context.
  */
 void releaseContext(AVCodecContext *context);
 
