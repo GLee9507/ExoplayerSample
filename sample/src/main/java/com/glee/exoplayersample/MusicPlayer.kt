@@ -69,7 +69,11 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
                 }, "exoplayer", bandwidthMeter))
     }
 
-    private val localDataSourceFactory by lazy { ExtractorMediaSource.Factory(DefaultDataSourceFactory(applicationContext, "exoplayer")) }
+    private val localDataSourceFactory by lazy {
+        ExtractorMediaSource.Factory(DefaultDataSourceFactory(applicationContext, "exoplayer")).apply {
+            setExtractorsFactory(FlacExtractor.FACTORY)
+        }
+    }
 
 
     override fun pause() {
