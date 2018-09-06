@@ -8,7 +8,7 @@ import com.google.android.exoplayer2.DefaultRenderersFactory.EXTENSION_RENDERER_
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.ext.flac.FlacExtractor
+//import com.google.android.exoplayer2.ext.flac.FlacExtractor
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
@@ -70,12 +70,14 @@ class MusicPlayer constructor(private val applicationContext: Context) : Player 
                 Call.Factory {
                     NET.newCall(it)
                 }, "exoplayer", bandwidthMeter))
+                .setExtractorsFactory(AudioExtractorsFactory())
     }
 
     private val localDataSourceFactory by lazy {
-        ExtractorMediaSource.Factory(DefaultDataSourceFactory(applicationContext, "exoplayer")).apply {
+        ExtractorMediaSource.Factory(
+                DefaultDataSourceFactory(applicationContext, "exoplayer")
+        ).setExtractorsFactory(AudioExtractorsFactory())
 
-        }
     }
 
 

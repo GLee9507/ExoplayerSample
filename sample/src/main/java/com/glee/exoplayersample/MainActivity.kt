@@ -21,10 +21,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        FfmpegLibrary.getVersion()
+//        return
         val musicPlayer = MusicPlayer(applicationContext)
         val path = Environment.getExternalStorageDirectory().canonicalPath + "/mc/Kalimba."
 //        val path = "android:resource://com.glee.exoplayersample/"
 
+//Log.d("glee9507",FfmpegLibrary.getVersion())
+//        Log.d("glee9507", FfmpegLibrary.supportsFormat(MimeTypes.AUDIO_FLAC).toString() + "--" + FfmpegLibrary.ffmpegHasDecoder ("ape"))
         musicPlayer.setMusicSource(
                 listOf(
 
@@ -34,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 //                Music(path+"ac3"),
                         //no support
 //                Music(path+"aiff"),
-//                Music(path+"amr"),
+//                Music(path+"amr")
                         //no support
 //                Music(path+"au"),
 //                Music(path+"m4a"),
@@ -46,14 +50,12 @@ class MainActivity : AppCompatActivity() {
 //                        Music(path + "wav"),
                         //no support
 //                Music(path+"wma")
-                        Music(path + "flac")
-//                Music(path + "ape")
+//                        Music(path + "flac")
+                        Music(path + "ape")
 
 
                 )
         )
-//Log.d("glee9507",FfmpegLibrary.getVersion())
-//        Log.d("glee9507", FfmpegLibrary.supportsFormat(MimeTypes.AUDIO_FLAC).toString() + "--" + FfmpegLibrary.ffmpegHasDecoder ("ape"))
         play.setOnClickListener {
             musicPlayer.play(0)
         }

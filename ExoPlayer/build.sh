@@ -1,8 +1,8 @@
 EXOPLAYER_ROOT="$(pwd)"
-FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
-NDK_PATH="/home/glee/Android/android-ndk-r15c"
-#NDK_PATH="/mnt/d/ubuntu/android-ndk"
-#FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
+#FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
+#NDK_PATH="/home/glee/Android/android-ndk-r15c"
+NDK_PATH="/mnt/d/ubuntu/android-ndk"
+FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
 HOST_PLATFORM="linux-x86_64"
 COMMON_OPTIONS="\
     --target-os=android \
@@ -12,7 +12,7 @@ COMMON_OPTIONS="\
     --disable-programs \
     --disable-everything \
     --disable-avdevice \
-    --disable-avformat \
+    --enable-avformat \
     --disable-swscale \
     --disable-postproc \
     --disable-avfilter \
@@ -20,19 +20,20 @@ COMMON_OPTIONS="\
     --disable-swresample \
     --enable-avresample \
     --disable-decoder=vorbis \
-    --enable-decoder=opus \
+    --disable-decoder=opus \
     --enable-decoder=ape\
-    --enable-decoder=flac \
+    --disable-decoder=flac \
     " && \
 
 cd "${FFMPEG_EXT_PATH}/jni" && \
 
-(proxychains4 git -C ffmpeg pull || proxychains4 git clone git://source.ffmpeg.org/ffmpeg ffmpeg) && \
+#(proxychains4 git -C ffmpeg pull || proxychains4 git clone git://source.ffmpeg.org/ffmpeg ffmpeg) && \
 cd ffmpeg && \
 make clean && ./configure \
     --libdir=android-libs/armeabi-v7a \
     --arch=arm \
     --cpu=armv7-a \
+    --incdir=/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main/jni/includes \
     --cross-prefix="${NDK_PATH}/toolchains/arm-linux-androideabi-4.9/prebuilt/${HOST_PLATFORM}/bin/arm-linux-androideabi-" \
     --sysroot="${NDK_PATH}/platforms/android-19/arch-arm/" \
     --extra-cflags="-march=armv7-a -mfloat-abi=softfp" \
@@ -40,7 +41,7 @@ make clean && ./configure \
     --extra-ldexeflags=-pie \
     ${COMMON_OPTIONS} \
     && \
-make -j4 && make install-libs  
+make -j4 && make install  
 
 # make clean && ./configure \
 #     --libdir=android-libs/arm64-v8a \

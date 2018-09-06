@@ -2,7 +2,6 @@ package com.glee.exoplayersample
 
 import android.content.Context
 import android.os.Handler
-
 import com.google.android.exoplayer2.Renderer
 import com.google.android.exoplayer2.RenderersFactory
 import com.google.android.exoplayer2.audio.AudioRendererEventListener

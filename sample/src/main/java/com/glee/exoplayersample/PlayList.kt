@@ -14,6 +14,7 @@ class PlayList constructor(private val context: Context) {
     private val playListSet = ArrayMap<String, MediaSource>()
     private val localDataSourceFactory by lazy {
         ExtractorMediaSource.Factory(DefaultDataSourceFactory(context, "exoplayer"))
+                .setExtractorsFactory(AudioExtractorsFactory())
     }
 
     fun add(musicSource: MusicSource) {

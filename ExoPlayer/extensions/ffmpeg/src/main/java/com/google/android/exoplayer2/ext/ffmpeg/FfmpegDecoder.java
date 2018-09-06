@@ -176,6 +176,10 @@ import java.util.List;
         }
     }
 
+//    public int getChannelCount() {
+//        return ffmpegGetChannelCount(nativeContext);
+//    }
+
     private native long ffmpegInitialize(String codecName, byte[] extraData, boolean outputFloat);
 
     private native int ffmpegDecode(long context, ByteBuffer inputData, int inputSize,
