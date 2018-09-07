@@ -154,7 +154,10 @@ public class ByteUtil {
         l |= ((long) b[index + 2] << 16);
         l &= 0xffffff;
         l |= ((long) b[index + 3] << 24);
+
+        byte[] array = new byte[4];
         return Float.intBitsToFloat(l);
+
     }
 
     /**

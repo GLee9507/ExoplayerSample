@@ -19,10 +19,13 @@ COMMON_OPTIONS="\
     --disable-symver \
     --disable-swresample \
     --enable-avresample \
-    --disable-decoder=vorbis \
-    --disable-decoder=opus \
+    --enable-decoder=vorbis \
+    --enable-decoder=opus \
     --enable-decoder=ape\
-    --disable-decoder=flac \
+    --enable-demuxer=ape\
+    --enable-decoder=mp3\
+    --enable-decoder=flac \
+    --enable-demuxer=vorbis \
     " && \
 
 cd "${FFMPEG_EXT_PATH}/jni" && \
@@ -41,7 +44,7 @@ make clean && ./configure \
     --extra-ldexeflags=-pie \
     ${COMMON_OPTIONS} \
     && \
-make -j4 && make install  
+make -j4 && make install-libs
 
 # make clean && ./configure \
 #     --libdir=android-libs/arm64-v8a \
