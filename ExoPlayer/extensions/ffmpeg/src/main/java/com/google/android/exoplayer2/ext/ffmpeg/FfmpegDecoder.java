@@ -154,14 +154,14 @@ import java.util.List;
     private static byte[] getExtraData(String mimeType, List<byte[]> initializationData) {
         switch (mimeType) {
             case MimeTypes.AUDIO_APE:
-                byte[] extraData1 = new byte[6];
-                extraData1[0] = (byte) -106;
-                extraData1[1] = (byte) 15;
-                extraData1[2] = (byte) -48;
-                extraData1[3] = (byte) 7;
-                extraData1[4] = 0;
-                extraData1[5] = 0;
-                return extraData1;
+//                byte[] extraData1 = new byte[6];
+//                extraData1[0] = (byte) -106;
+//                extraData1[1] = (byte) 15;
+//                extraData1[2] = (byte) -48;
+//                extraData1[3] = (byte) 7;
+//                extraData1[4] = 0;
+//                extraData1[5] = 0;
+                return null;
 
             case MimeTypes.AUDIO_AAC:
             case MimeTypes.AUDIO_ALAC:

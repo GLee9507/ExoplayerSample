@@ -27,6 +27,7 @@ extern "C" {
 #endif
 #include <libavcodec/avcodec.h>
 #include <libavresample/avresample.h>
+#include <libavutil/channel_layout.h>
 #include <libavutil/error.h>
 #include <libavutil/opt.h>
 }
@@ -65,15 +66,16 @@ static const AVSampleFormat OUTPUT_FORMAT_PCM_FLOAT = AV_SAMPLE_FMT_FLT;
 /**
  * Returns the AVCodec with the specified name, or NULL if it is not available.
  */
-AVCodec *getCodecByName(JNIEnv *env, jstring codecName);
+AVCodec *getCodecByName(JNIEnv* env, jstring codecName);
 
 /**
  * Allocates and opens a new AVCodecContext for the specified codec, passing the
  * provided extraData as initialization data for the decoder if it is non-NULL.
  * Returns the created context.
  */
-AVCodecContext *createContext(JNIEnv *env, AVCodec *codec,
-                              jbyteArray extraData, jboolean outputFloat);
+AVCodecContext *createContext(JNIEnv *env, AVCodec *codec, jbyteArray extraData,
+                              jboolean outputFloat, jint rawSampleRate,
+                              jint rawChannelCount);
 
 /**
  * Decodes the packet into the output buffer, returning the number of bytes
@@ -94,7 +96,7 @@ void releaseContext(AVCodecContext *context);
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env;
-    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
     avcodec_register_all();
@@ -110,13 +112,14 @@ LIBRARY_FUNC(jboolean, ffmpegHasDecoder, jstring codecName) {
 }
 
 DECODER_FUNC(jlong, ffmpegInitialize, jstring codecName, jbyteArray extraData,
-             jboolean outputFloat) {
+             jboolean outputFloat, jint rawSampleRate, jint rawChannelCount) {
     AVCodec *codec = getCodecByName(env, codecName);
     if (!codec) {
         LOGE("Codec not found.");
         return 0L;
     }
-    return (jlong) createContext(env, codec, extraData, outputFloat);
+    return (jlong)createContext(env, codec, extraData, outputFloat, rawSampleRate,
+                                rawChannelCount);
 }
 
 DECODER_FUNC(jint, ffmpegDecode, jlong context, jobject inputData,
@@ -180,8 +183,11 @@ DECODER_FUNC(jlong, ffmpegReset, jlong jContext, jbyteArray extraData) {
             LOGE("Unexpected error finding codec %d.", codecId);
             return 0L;
         }
-        return (jlong) createContext(env, codec, extraData,
-                                     context->request_sample_fmt == OUTPUT_FORMAT_PCM_FLOAT);
+        jboolean outputFloat =
+                (jboolean)(context->request_sample_fmt == OUTPUT_FORMAT_PCM_FLOAT);
+        return (jlong)createContext(env, codec, extraData, outputFloat,
+                /* rawSampleRate= */ -1,
+                /* rawChannelCount= */ -1);
     }
 
     avcodec_flush_buffers(context);
@@ -194,26 +200,20 @@ DECODER_FUNC(void, ffmpegRelease, jlong context) {
     }
 }
 
-AVCodec *getCodecByName(JNIEnv *env, jstring codecName) {
+AVCodec *getCodecByName(JNIEnv* env, jstring codecName) {
     if (!codecName) {
         return NULL;
     }
     const char *codecNameChars = env->GetStringUTFChars(codecName, NULL);
-    AVCodec *codec = avcodec_find_decoder_by_name("ape");
+    AVCodec *codec = avcodec_find_decoder_by_name(codecNameChars);
     env->ReleaseStringUTFChars(codecName, codecNameChars);
     return codec;
 }
 
-AVCodecContext *createContext(JNIEnv *env, AVCodec *codec,
-                              jbyteArray extraData, jboolean outputFloat) {
+AVCodecContext *createContext(JNIEnv *env, AVCodec *codec, jbyteArray extraData,
+                              jboolean outputFloat, jint rawSampleRate,
+                              jint rawChannelCount) {
     AVCodecContext *context = avcodec_alloc_context3(codec);
-//    context->channels = 2;
-//    context->sample_rate = 44100;
-//    context->frame_size=4608;
-//    context->bits_per_coded_sample=16;
-//    context->frame_number=142;
-
-    LOGE("Failed to allocate context.");
     if (!context) {
         LOGE("Failed to allocate context.");
         return NULL;
@@ -223,7 +223,7 @@ AVCodecContext *createContext(JNIEnv *env, AVCodec *codec,
     if (extraData) {
         jsize size = env->GetArrayLength(extraData);
         context->extradata_size = size;
-        context->extradata =
+        context->d =
                 (uint8_t *) av_malloc(size + AV_INPUT_BUFFER_PADDING_SIZE);
         if (!context->extradata) {
             LOGE("Failed to allocate extradata.");
@@ -231,6 +231,12 @@ AVCodecContext *createContext(JNIEnv *env, AVCodec *codec,
             return NULL;
         }
         env->GetByteArrayRegion(extraData, 0, size, (jbyte *) context->extradata);
+    }
+    if (context->codec_id == AV_CODEC_ID_PCM_MULAW ||
+        context->codec_id == AV_CODEC_ID_PCM_ALAW) {
+        context->sample_rate = rawSampleRate;
+        context->channels = rawChannelCount;
+        context->channel_layout = av_get_default_channel_layout(rawChannelCount);
     }
     int result = avcodec_open2(context, codec, NULL);
     if (result < 0) {
@@ -282,7 +288,7 @@ int decodePacket(AVCodecContext *context, AVPacket *packet,
             resampleContext = (AVAudioResampleContext *) context->opaque;
         } else {
             resampleContext = avresample_alloc_context();
-            av_opt_set_int(resampleContext, "in_channel_layout", channelLayout, 0);
+            av_opt_set_int(resampleContext, "in_channel_layout",  channelLayout, 0);
             av_opt_set_int(resampleContext, "out_channel_layout", channelLayout, 0);
             av_opt_set_int(resampleContext, "in_sample_rate", sampleRate, 0);
             av_opt_set_int(resampleContext, "out_sample_rate", sampleRate, 0);
@@ -331,7 +337,7 @@ int decodePacket(AVCodecContext *context, AVPacket *packet,
 void logError(const char *functionName, int errorNumber) {
     char *buffer = (char *) malloc(ERROR_STRING_BUFFER_LENGTH * sizeof(char));
     av_strerror(errorNumber, buffer, ERROR_STRING_BUFFER_LENGTH);
-    LOGE("Error in %s: %s", functionName, buffer);
+    LOGE("Error in %s: %s===%d", functionName, buffer,errorNumber);
     free(buffer);
 }
 
@@ -346,4 +352,3 @@ void releaseContext(AVCodecContext *context) {
     }
     avcodec_free_context(&context);
 }
-

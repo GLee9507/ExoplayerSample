@@ -33,7 +33,9 @@ import java.io.IOException
  */
 class APEHeaderNew {
     var nCompressionLevel: Int = 0        // the compression level (unsigned short)
+    var nCompressionLevelByteArray=ByteArray(2)      // the compression level (unsigned short)
     var nFormatFlags: Int = 0            // any format flags (for future use) (unsigned short)
+    var nFormatFlagsByteArray= ByteArray(2)            // any format flags (for future use) (unsigned short)
 
     var nBlocksPerFrame: Long = 0        // the number of audio blocks in one frame (unsigned int)
     var nFinalFrameBlocks: Long = 0        // the number of audio blocks in the final frame (unsigned int)
@@ -49,8 +51,8 @@ class APEHeaderNew {
 
         @Throws(IOException::class)
         fun read(input: ExtractorInput) = APEHeaderNew().apply {
-            nCompressionLevel = input.readUnsignedShort()
-            nFormatFlags = input.readUnsignedShort()
+            nCompressionLevel = input.readUnsignedShort(nCompressionLevelByteArray)
+            nFormatFlags = input.readUnsignedShort(nFormatFlagsByteArray)
             nBlocksPerFrame = input.readUnsignedInt()
             nFinalFrameBlocks = input.readUnsignedInt()
             nTotalFrames = input.readUnsignedInt()

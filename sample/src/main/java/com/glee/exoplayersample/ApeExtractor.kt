@@ -85,8 +85,9 @@ internal class ApeExtractor : Extractor {
                     NUM_BUFFERS,
                     INITIAL_INPUT_BUFFER_SIZE,
                     MimeTypes.AUDIO_APE,
+//                    listOf(apeFileInfo!!.extraData),
                     null,
-                    true
+                    false
             )
         } catch (e: FfmpegDecoderException) {
             e.printStackTrace()

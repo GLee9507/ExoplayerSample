@@ -1,8 +1,8 @@
 EXOPLAYER_ROOT="$(pwd)"
-#FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
-#NDK_PATH="/home/glee/Android/android-ndk-r15c"
-NDK_PATH="/mnt/d/ubuntu/android-ndk"
-FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
+FFMPEG_EXT_PATH="${EXOPLAYER_ROOT}/extensions/ffmpeg/src/main"
+NDK_PATH="/home/glee/Android/android-ndk-r15c"
+#NDK_PATH="/mnt/d/ubuntu/android-ndk"
+#FFMPEG_EXT_PATH="/mnt/d/android-project/ExoplayerSample/ExoPlayer/extensions/ffmpeg/src/main"
 HOST_PLATFORM="linux-x86_64"
 COMMON_OPTIONS="\
     --target-os=android \
@@ -20,12 +20,13 @@ COMMON_OPTIONS="\
     --disable-swresample \
     --enable-avresample \
     --enable-decoder=vorbis \
+    --enable-demuxer=vorbis \
     --enable-decoder=opus \
+    --enable-demuxer=opus \
     --enable-decoder=ape\
     --enable-demuxer=ape\
-    --enable-decoder=mp3\
-    --enable-decoder=flac \
-    --enable-demuxer=vorbis \
+    --enable-parser=ape\
+    --enable-muxer=ape\
     " && \
 
 cd "${FFMPEG_EXT_PATH}/jni" && \

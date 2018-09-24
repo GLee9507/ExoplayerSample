@@ -33,6 +33,7 @@ class APEFileInfo {
     var spSeekBitTable: ByteArray? = null      // the seek table (bits -- legacy)
     var spWaveHeaderData: ByteArray? = null        // the pre-audio header data
     var spAPEDescriptor = APEDescriptor()     // the descriptor (only with newer files)
+    var extraData = ByteArray(6)
 
     companion object {
         const val MAC_FORMAT_FLAG_CREATE_WAV_HEADER = 32
@@ -41,7 +42,10 @@ class APEFileInfo {
                 with(input) {
                     val apeFileInfo = APEFileInfo()
                     input.skip(4)
-                    apeFileInfo.nVersion = input.readUnsignedShort()
+                    val byteArray = ByteArray(2)
+                    apeFileInfo.nVersion = input.readUnsignedShort(byteArray)
+                    apeFileInfo.extraData[0] = byteArray[0]
+                    apeFileInfo.extraData[1] = byteArray[1]
                     if (apeFileInfo.nVersion >= 3890) {
                         val apeDescriptor = apeFileInfo.spAPEDescriptor
 //                        apeFileInfo.spAPEDescriptor = apeDescriptor
@@ -64,6 +68,10 @@ class APEFileInfo {
                         }
 
                         val apeHeaderNew = APEHeaderNew.read(input)
+                        apeFileInfo.extraData[2] = apeHeaderNew.nCompressionLevelByteArray[0]
+                        apeFileInfo.extraData[3] = apeHeaderNew.nCompressionLevelByteArray[1]
+                        apeFileInfo.extraData[4] = apeHeaderNew.nFormatFlagsByteArray[0]
+                        apeFileInfo.extraData[5] = apeHeaderNew.nFormatFlagsByteArray[1]
                         if ((apeFileInfo.spAPEDescriptor.nHeaderBytes - APEHeaderNew.APE_HEADER_BYTES) > 0) {
                             input.skip((apeFileInfo.spAPEDescriptor.nHeaderBytes - APEHeaderNew.APE_HEADER_BYTES).toInt())
                         }

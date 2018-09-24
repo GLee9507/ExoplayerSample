@@ -24,7 +24,8 @@ class MainActivity : AppCompatActivity() {
 //        FfmpegLibrary.getVersion()
 //        return
         val musicPlayer = MusicPlayer(applicationContext)
-        val path = Environment.getExternalStorageDirectory().canonicalPath + "/mc/Kalimba."
+//        val path = Environment.getExternalStorageDirectory().canonicalPath + "/mc/Kalimba."
+        val path = Environment.getExternalStorageDirectory().canonicalPath + "/Download/mc/十年."
 //        val path = "android:resource://com.glee.exoplayersample/"
 
 //Log.d("glee9507",FfmpegLibrary.getVersion())

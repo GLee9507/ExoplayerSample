@@ -37,6 +37,13 @@ fun ExtractorInput.readUnsignedShort(): Int {
     return ((byteArray[0].toInt() and 0xff) or (byteArray[1].toInt() and 0xff shl 8))
 }
 
+@Throws(IOException::class, InterruptedException::class)
+fun ExtractorInput.readUnsignedShort(byteArray: ByteArray): Int {
+//    val byteArray = ByteArray(2)
+    read(byteArray, 0, 2)
+    return ((byteArray[0].toInt() and 0xff) or (byteArray[1].toInt() and 0xff shl 8))
+}
+
 
 //fun ExtractorInput.readUnsignedInt(): Long {
 //    val byteArray = ByteArray(2)
@@ -46,6 +53,6 @@ fun ExtractorInput.readUnsignedShort(): Int {
 @Throws(IOException::class, InterruptedException::class)
 fun ExtractorInput.readUnsignedInt(): Long {
     val array = ByteArray(4)
-    read(array,0,4)
+    read(array, 0, 4)
     return (array[0].toInt() and 0xff).toLong() or ((array[1].toInt() and 0xff).toLong() shl 8) or ((array[2].toInt() and 0xff).toLong() shl 16) or ((array[3].toInt() and 0xff).toLong() shl 24)
 }
